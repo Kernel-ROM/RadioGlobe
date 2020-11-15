@@ -1,6 +1,8 @@
 #! /usr/bin/python3
 import re
+import sys
 import time
+import signal
 import threading
 import subprocess
 
@@ -22,6 +24,22 @@ jog = 0
 last_jog = 0
 state_entry = True
 ui_manager = UI_Manager()
+
+
+def shutdown_sequence(signum, frame):
+    display_thread.clear()
+    time.sleep(0.1)
+    display_thread.message(
+        line_1="Shutting down...",
+        line_2="Please wait 10 sec",
+        line_3="before disconnecting",
+        line_4="power.")
+    time.sleep(2)
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, shutdown_sequence)
+signal.signal(signal.SIGTERM, shutdown_sequence)
 
 # This is used to increase the size of the area searched around the coords
 # For example, fuzziness 2, latitude 50 and longitude 0 will result in a
@@ -157,9 +175,9 @@ while True:
       state_entry = False
       display_thread.message(
         line_1="Radio Globe",
-        line_2="Made for DesignSpark",
-        line_3="by Jude Pullen and",
-        line_4="Donald Robson, 2020")
+        line_2="by Jude Pullen,",
+        line_3="Donald Robson and",
+        line_4="Kernel-ROM - 2020")
       scheduler.attach_timer(Back_To_Tuning, 3)
 
   elif state == "tuning":
